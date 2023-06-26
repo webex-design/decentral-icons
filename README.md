@@ -1,2 +1,2 @@
 # decentral-icons
-decentral icon library with AI
+Decentral icon library with AI

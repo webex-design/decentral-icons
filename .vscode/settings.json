@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./src/public"
+    ],
+    "git.ignoreLimitWarning": true
+}
