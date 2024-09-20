@@ -4,7 +4,6 @@ from tensorflow import keras
 from super_dataset import Super_Dataset
 import os
 from config import config
-import tensorflow_addons as tfa
 import shutil
 
 class Main():
@@ -14,7 +13,7 @@ class Main():
         self.model_path = os.path.join(config['path_root'], 'models/super/models/m')
         self.predict_path = os.path.join(config['path_root'], 'models/super/predict')
         self.path_style = os.path.join(config['path_root'], 'data/style')
-        self.predict_path_img = os.path.join(config['path_root'], 'data/style/culture/van_gogh_starry_sky.jpg')
+        self.predict_path_img = os.path.join(config['path_root'], 'data/DIV2K/DIV2K_valid_LR/0808x4.png')
         self.predict_path_img2 = os.path.join(config['path_root'], 'data/style/culture/paper_cut.jpg')
         self.path_checkpoints = os.path.join(config['path_root'], 'models/super/checkpoints/ckpt')
         if os.path.exists(self.predict_path):
@@ -43,7 +42,7 @@ class Main():
         self.model.compile(
             optimizer=keras.optimizers.legacy.Adam(
                 learning_rate= 1e-6,
-                beta_1 = 0.01,
+                beta_1 = 0.9,
                 epsilon = 1e-10
             ), 
             loss=MY_LOSS,
@@ -61,7 +60,7 @@ class Main():
         return
         
     def train_call_back(self, epoch=None, logs=None):
-        if epoch % 500 == 499:
+        if epoch % 20 == 19:
             self.predict(self.LOW_IMAGE, f'{self.predict_path}/training_{epoch}.jpg')
         return
 
@@ -114,9 +113,9 @@ class Main():
 
 with tf.device('/GPU:0'):
     main = Main()
-    #main.create() 
-    main.load_weight()
-    main.train(2000)
+    main.create()
+    #main.load_weight()
+    main.train(500)
     main.model.save(main.model_path)
     #tf.saved_model.save(main.model, main.model_path)
     #main.model.save_weights(main.path_checkpoints)

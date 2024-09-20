@@ -7,9 +7,9 @@ import tensorflow_hub as hub
 current_file_dir = os.path.dirname(os.path.realpath(__file__))
 path_root = os.path.abspath(os.path.join(current_file_dir, '../../'))
 path_model = os.path.join(path_root, 'models/magenta_arbitrary-image-stylization-v1-256_2')
-path_style = os.path.join(path_root, 'data/style/shanshui')
-path_content = os.path.join(path_root, 'data/scene/Clarissa_Smith.jpg')
-path_output = os.path.join(path_root, 'output/vgg')
+path_style = os.path.join(path_root, 'data/style/art')
+path_content = os.path.join(path_root, 'data/scene/Clarissa_Smith.png')
+path_output = os.path.join(path_root, 'models/vgg/output')
 
 default_re = re.compile(r'.(jpg|png)$', re.I)
 
@@ -34,12 +34,12 @@ class VGG:
         image = tf.image.decode_jpeg(image, 3)
         if need_resize:
             image = tf.image.resize(image, [256,256]) # [256,256]
-        return tf.cast(image / 255, tf.float32)
+        return tf.cast(image / 255, tf.float32), path
     
     def create_dataset_one(self, sources):
         dataset_train = tf.data.Dataset.from_tensor_slices(sources)
         dataset_train = dataset_train.map(self.__load)
-        dataset_train = dataset_train.shuffle(buffer_size=len(sources))
+        #dataset_train = dataset_train.shuffle(buffer_size=len(sources))
         dataset_train = dataset_train.batch(batch_size=1)
         return dataset_train
     
@@ -50,7 +50,7 @@ class VGG:
         tf.keras.preprocessing.image.save_img(os.path.join(path_output, f'{name}.jpg'), stylized_image[0])
     
     def run(self):
-        content = self.__load(path_content, False)
+        content, content_file_name = self.__load(path_content, False)
         content = content[tf.newaxis, :]
 
         style_paths = self.__scan(path_style)
@@ -62,8 +62,8 @@ class VGG:
         if not os.path.exists(path_output):
             os.makedirs(path_output)
             
-        for style_image in my_dataset:
-            self.predict_img(content, style_image, i)
+        for style_image,file_name in my_dataset:
+            self.predict_img(content, style_image, os.path.splitext(os.path.basename(file_name[0].numpy().decode()))[0])
             i+=1
         return
     
